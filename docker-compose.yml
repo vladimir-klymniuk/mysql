@@ -1,0 +1,81 @@
+version: '3.9'
+
+networks:
+    backend:
+        driver: ${NETWORKS_DRIVER}
+    frontend:
+        driver: ${NETWORKS_DRIVER}
+
+volumes:
+    mysql:
+        driver: ${VOLUMES_DRIVER}
+
+    mariadb:
+        driver: ${VOLUMES_DRIVER}
+
+    phpmyadmin:
+        driver: ${VOLUMES_DRIVER}
+
+services:
+
+### MYSQL ################################################
+    mysql:
+        build:
+            context: ./docker
+            args:
+                - MYSQL_VERSION=${MYSQL_VERSION}
+        environment:
+            - MYSQL_DATABASE=${MYSQL_DATABASE}
+            - MYSQL_USER=${MYSQL_USER}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - TZ=${WORKSPACE_TIMEZONE}
+        volumes:
+            -  ../../data/mysql/:/var/lib/mysql
+            - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
+        ports:
+            - "${MYSQL_PORT}:3306"
+        networks:
+            - backend
+
+### phpMyAdmin ###########################################
+#    phpmyadmin:
+#      build: ./phpmyadmin
+#      environment:
+#        - PMA_ARBITRARY=1
+#        - MYSQL_USER=${PMA_USER}
+#        - MYSQL_PASSWORD=${PMA_PASSWORD}
+#        - MYSQL_ROOT_PASSWORD=${PMA_ROOT_PASSWORD}
+#        - MAX_EXECUTION_TIME=${PMA_MAX_EXECUTION_TIME}
+#        - MEMORY_LIMIT=${PMA_MEMORY_LIMIT}
+#        - UPLOAD_LIMIT=${PMA_UPLOAD_LIMIT}
+#      ports:
+#        - "${PMA_PORT}:80"
+#      depends_on:
+#        - "${PMA_DB_ENGINE}"
+#      networks:
+#        - frontend
+#        - backend
+
+### MariaDB ##############################################
+#    mariadb:
+#      build:
+#        context: ./mariadb
+#        args:
+#          - http_proxy
+#          - https_proxy
+#          - no_proxy
+#          - MARIADB_VERSION=${MARIADB_VERSION}
+#      volumes:
+#        - ${DATA_PATH_HOST}/mariadb:/var/lib/mysql
+#        - ${MARIADB_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
+#      ports:
+#        - "${MARIADB_PORT}:3306"
+#      environment:
+#        - TZ=${WORKSPACE_TIMEZONE}
+#        - MYSQL_DATABASE=${MARIADB_DATABASE}
+#        - MYSQL_USER=${MARIADB_USER}
+#        - MYSQL_PASSWORD=${MARIADB_PASSWORD}
+#        - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+#      networks:
+#        - backend
